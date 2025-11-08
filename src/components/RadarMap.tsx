@@ -3,7 +3,6 @@ import {
     MapContainer,
     TileLayer,
     ImageOverlay,
-    useMap,
     Rectangle,
 } from "react-leaflet";
 import L from "leaflet";
