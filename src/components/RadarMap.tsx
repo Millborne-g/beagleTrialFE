@@ -1,5 +1,11 @@
-import { useEffect, useRef } from "react";
-import { MapContainer, TileLayer, ImageOverlay, useMap, Rectangle } from "react-leaflet";
+import { useRef } from "react";
+import {
+    MapContainer,
+    TileLayer,
+    ImageOverlay,
+    useMap,
+    Rectangle,
+} from "react-leaflet";
 import L from "leaflet";
 import type { RadarData } from "../types/radar.types";
 import "leaflet/dist/leaflet.css";
@@ -24,11 +30,11 @@ interface RadarMapProps {
 
 // Component to update map when radar data changes
 function RadarOverlay({ radarData, opacity }: RadarMapProps) {
-    const map = useMap();
+   
 
     // Don't auto-fit bounds - keep the view stable
     // Users can zoom/pan manually as needed
-    
+
     // Optionally: Uncomment below to auto-fit on first load only
     // useEffect(() => {
     //     if (radarData && radarData.bounds && mapRef.current) {
@@ -69,7 +75,7 @@ export default function RadarMap({ radarData, opacity }: RadarMapProps) {
     // Define bounds for Continental US (where MRMS data is available)
     const maxBounds: [[number, number], [number, number]] = [
         [22.0, -130.0], // Southwest corner
-        [52.0, -60.0],  // Northeast corner
+        [52.0, -60.0], // Northeast corner
     ];
 
     return (
