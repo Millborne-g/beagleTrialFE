@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { MapContainer, TileLayer, ImageOverlay, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, ImageOverlay, useMap, Rectangle } from "react-leaflet";
 import L from "leaflet";
 import type { RadarData } from "../types/radar.types";
 import "leaflet/dist/leaflet.css";
@@ -26,16 +26,19 @@ interface RadarMapProps {
 function RadarOverlay({ radarData, opacity }: RadarMapProps) {
     const map = useMap();
 
-    useEffect(() => {
-        if (radarData && radarData.bounds) {
-            // Optionally fit bounds when new data loads
-            const bounds = L.latLngBounds(
-                [radarData.bounds.south, radarData.bounds.west],
-                [radarData.bounds.north, radarData.bounds.east]
-            );
-            map.fitBounds(bounds);
-        }
-    }, [radarData, map]);
+    // Don't auto-fit bounds - keep the view stable
+    // Users can zoom/pan manually as needed
+    
+    // Optionally: Uncomment below to auto-fit on first load only
+    // useEffect(() => {
+    //     if (radarData && radarData.bounds && mapRef.current) {
+    //         const bounds = L.latLngBounds(
+    //             [radarData.bounds.south, radarData.bounds.west],
+    //             [radarData.bounds.north, radarData.bounds.east]
+    //         );
+    //         map.fitBounds(bounds, { maxZoom: 6 });
+    //     }
+    // }, []); // Empty dependency = run once on mount
 
     if (!radarData || !radarData.imageUrl) {
         return null;
@@ -60,14 +63,24 @@ export default function RadarMap({ radarData, opacity }: RadarMapProps) {
     const mapRef = useRef<L.Map | null>(null);
 
     // Default center: USA (centered over Kansas)
-    const defaultCenter: [number, number] = [39.0, -98.0];
+    const defaultCenter: [number, number] = [37.5, -95.0];
     const defaultZoom = 5;
+
+    // Define bounds for Continental US (where MRMS data is available)
+    const maxBounds: [[number, number], [number, number]] = [
+        [22.0, -130.0], // Southwest corner
+        [52.0, -60.0],  // Northeast corner
+    ];
 
     return (
         <div className="w-full h-full relative">
             <MapContainer
                 center={defaultCenter}
                 zoom={defaultZoom}
+                minZoom={4}
+                maxZoom={10}
+                maxBounds={maxBounds}
+                maxBoundsViscosity={0.7}
                 className="w-full h-full"
                 zoomControl={true}
                 ref={mapRef}
@@ -86,6 +99,23 @@ export default function RadarMap({ radarData, opacity }: RadarMapProps) {
 
                 {/* Radar overlay */}
                 <RadarOverlay radarData={radarData} opacity={opacity} />
+
+                {/* MRMS Coverage Area Boundary */}
+                {radarData && (
+                    <Rectangle
+                        bounds={[
+                            [radarData.bounds.south, radarData.bounds.west],
+                            [radarData.bounds.north, radarData.bounds.east],
+                        ]}
+                        pathOptions={{
+                            color: "#3b82f6",
+                            weight: 2,
+                            opacity: 0.6,
+                            fill: false,
+                            dashArray: "5, 5",
+                        }}
+                    />
+                )}
             </MapContainer>
 
             {/* Loading indicator */}

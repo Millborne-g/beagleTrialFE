@@ -122,6 +122,26 @@ class RadarApiService {
     }
 
     /**
+     * Get multiple radar frames for animation
+     */
+    async getRadarFrames(count: number = 10): Promise<RadarData[]> {
+        try {
+            const response = await this.api.get<ApiResponse<RadarData[]>>(
+                `/radar/frames?count=${count}`
+            );
+
+            if (response.data.success && response.data.data) {
+                return response.data.data;
+            }
+
+            throw new Error(response.data.error || "Failed to fetch frames");
+        } catch (error) {
+            console.warn("Backend not available, using mock frames");
+            return this.getMockFrames(count);
+        }
+    }
+
+    /**
      * Mock data for development (until backend is ready)
      */
     private getMockRadarData(): RadarData {
@@ -156,6 +176,35 @@ class RadarApiService {
         }
 
         return timestamps.reverse();
+    }
+
+    private getMockFrames(count: number): RadarData[] {
+        const frames: RadarData[] = [];
+        const now = new Date();
+
+        for (let i = 0; i < count; i++) {
+            const time = new Date(now.getTime() - i * 2 * 60 * 1000);
+            frames.push({
+                timestamp: time.toISOString(),
+                imageUrl:
+                    "https://via.placeholder.com/800x600/1a1a2e/00ff00?text=Frame+" +
+                    i,
+                bounds: {
+                    north: 49.0,
+                    south: 25.0,
+                    east: -66.0,
+                    west: -125.0,
+                },
+                metadata: {
+                    dataType: "RALA",
+                    updateInterval: 2,
+                    source: "MRMS",
+                    units: "dBZ",
+                },
+            });
+        }
+
+        return frames.reverse();
     }
 
     /**

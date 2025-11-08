@@ -3,11 +3,17 @@ import RadarMap from "./components/RadarMap";
 import Header from "./components/Header";
 import Legend from "./components/Legend";
 import ControlPanel from "./components/ControlPanel";
+import AnimationPlayer from "./components/AnimationPlayer";
 import { radarApi } from "./services/radarApi";
 import type { RadarData } from "./types/radar.types";
 
 function App() {
     const [radarData, setRadarData] = useState<RadarData | null>(null);
+    const [radarFrames, setRadarFrames] = useState<RadarData[]>([]);
+    const [currentFrameIndex, setCurrentFrameIndex] = useState(0);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [hasAutoPlayed, setHasAutoPlayed] = useState(false); // Track if we've autoplayed
+    const [animationSpeed, setAnimationSpeed] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isBackendConnected, setIsBackendConnected] = useState(false);
@@ -16,35 +22,52 @@ function App() {
     const [error, setError] = useState<string | null>(null);
 
     const refreshInterval = 120; // 2 minutes in seconds
+    const frameCount = 10; // Number of frames to load for animation
 
     // Fetch radar data
-    const fetchRadarData = useCallback(async (showRefreshingState = false) => {
-        try {
-            if (showRefreshingState) {
-                setIsRefreshing(true);
-            } else {
-                setIsLoading(true);
+    const fetchRadarData = useCallback(
+        async (showRefreshingState = false) => {
+            try {
+                if (showRefreshingState) {
+                    setIsRefreshing(true);
+                } else {
+                    setIsLoading(true);
+                }
+                setError(null);
+
+                const data = await radarApi.getLatestRadarData();
+                setRadarData(data);
+
+                // Also fetch frames for animation
+                const frames = await radarApi.getRadarFrames(frameCount);
+                if (frames.length > 0) {
+                    setRadarFrames(frames);
+                    setCurrentFrameIndex(frames.length - 1); // Start with most recent
+
+                    // Auto-play animation only on initial load (not on refresh)
+                    if (!hasAutoPlayed && !showRefreshingState) {
+                        setIsAnimating(true);
+                        setHasAutoPlayed(true);
+                    }
+                }
+
+                // Check backend connection
+                const healthStatus = await radarApi.checkHealth();
+                setIsBackendConnected(healthStatus);
+            } catch (err) {
+                const errorMessage =
+                    err instanceof Error
+                        ? err.message
+                        : "Failed to fetch radar data";
+                setError(errorMessage);
+                console.error("Error fetching radar data:", err);
+            } finally {
+                setIsLoading(false);
+                setIsRefreshing(false);
             }
-            setError(null);
-
-            const data = await radarApi.getLatestRadarData();
-            setRadarData(data);
-
-            // Check backend connection
-            const healthStatus = await radarApi.checkHealth();
-            setIsBackendConnected(healthStatus);
-        } catch (err) {
-            const errorMessage =
-                err instanceof Error
-                    ? err.message
-                    : "Failed to fetch radar data";
-            setError(errorMessage);
-            console.error("Error fetching radar data:", err);
-        } finally {
-            setIsLoading(false);
-            setIsRefreshing(false);
-        }
-    }, []);
+        },
+        [frameCount, hasAutoPlayed]
+    );
 
     // Initial load
     useEffect(() => {
@@ -62,6 +85,30 @@ function App() {
         return () => clearInterval(interval);
     }, [autoRefresh, refreshInterval, fetchRadarData]);
 
+    // Animation loop
+    useEffect(() => {
+        if (!isAnimating || radarFrames.length === 0) return;
+
+        const frameDelay = 1000 / animationSpeed; // Delay between frames in ms
+        const interval = setInterval(() => {
+            setCurrentFrameIndex((prev) => {
+                if (prev >= radarFrames.length - 1) {
+                    return 0; // Loop back to first frame
+                }
+                return prev + 1;
+            });
+        }, frameDelay);
+
+        return () => clearInterval(interval);
+    }, [isAnimating, radarFrames.length, animationSpeed]);
+
+    // Update displayed radar data when frame changes
+    useEffect(() => {
+        if (radarFrames.length > 0 && radarFrames[currentFrameIndex]) {
+            setRadarData(radarFrames[currentFrameIndex]);
+        }
+    }, [currentFrameIndex, radarFrames]);
+
     const handleRefresh = () => {
         fetchRadarData(true);
     };
@@ -72,6 +119,19 @@ function App() {
 
     const handleAutoRefreshToggle = () => {
         setAutoRefresh(!autoRefresh);
+    };
+
+    const handleFrameChange = (frameIndex: number) => {
+        setCurrentFrameIndex(frameIndex);
+        setIsAnimating(false); // Pause animation when manually changing frames
+    };
+
+    const handlePlayPauseToggle = () => {
+        setIsAnimating(!isAnimating);
+    };
+
+    const handleSpeedChange = (speed: number) => {
+        setAnimationSpeed(speed);
     };
 
     return (
@@ -96,6 +156,17 @@ function App() {
                             onAutoRefreshToggle={handleAutoRefreshToggle}
                             refreshInterval={refreshInterval}
                         />
+                        {radarFrames.length > 0 && (
+                            <AnimationPlayer
+                                frameCount={radarFrames.length}
+                                currentFrame={currentFrameIndex}
+                                onFrameChange={handleFrameChange}
+                                isPlaying={isAnimating}
+                                onPlayPauseToggle={handlePlayPauseToggle}
+                                speed={animationSpeed}
+                                onSpeedChange={handleSpeedChange}
+                            />
+                        )}
                     </div>
                 </div>
 
