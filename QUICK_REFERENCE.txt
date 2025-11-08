@@ -1,0 +1,217 @@
+/* WEATHER RADAR DISPLAY - QUICK REFERENCE */
+
+==================================================
+🚀 QUICK START
+==================================================
+
+Install & Run:
+  npm install
+  npm run dev
+  → Open http://localhost:5173
+
+Build & Deploy:
+  npm run build
+  npm run preview
+
+==================================================
+📁 KEY FILES
+==================================================
+
+Components:
+  src/components/RadarMap.tsx      → Leaflet map
+  src/components/Header.tsx         → Top bar
+  src/components/ControlPanel.tsx   → Settings
+  src/components/Legend.tsx         → Color scale
+
+Services:
+  src/services/radarApi.ts         → API client
+
+Types:
+  src/types/radar.types.ts         → TypeScript defs
+
+Main:
+  src/App.tsx                       → Root component
+
+==================================================
+🔌 API ENDPOINTS (Backend)
+==================================================
+
+Required:
+  GET /api/radar/latest             → Latest data
+  GET /api/health                   → Health check
+
+Optional:
+  GET /api/radar/timestamp/:time    → Historical
+  GET /api/radar/timestamps         → Timeline
+
+==================================================
+⚙️ CONFIGURATION
+==================================================
+
+Environment:
+  .env                              → Config file
+  VITE_API_URL=http://localhost:3000/api
+
+Tailwind:
+  tailwind.config.js                → Theme config
+
+TypeScript:
+  tsconfig.json                     → TS config
+
+==================================================
+🎨 FEATURES
+==================================================
+
+✅ Interactive Leaflet map
+✅ Radar overlay with opacity control
+✅ Auto-refresh every 2 minutes
+✅ Manual refresh button
+✅ Backend status indicator
+✅ Reflectivity legend (dBZ scale)
+✅ Loading states
+✅ Error handling
+✅ Mock data mode
+✅ Tailwind styling
+
+==================================================
+📦 DEPENDENCIES
+==================================================
+
+Core:
+  react, react-dom                  → UI framework
+  typescript                        → Type safety
+  vite                              → Build tool
+
+Map:
+  leaflet, react-leaflet            → Mapping
+
+HTTP:
+  axios                             → API client
+
+Style:
+  tailwindcss, postcss, autoprefixer → Styling
+
+==================================================
+🔧 COMMANDS
+==================================================
+
+Development:
+  npm run dev                       → Start dev server
+  npm run build                     → Build for prod
+  npm run preview                   → Preview build
+  npm run lint                      → Run linter
+
+==================================================
+📚 DOCUMENTATION
+==================================================
+
+README.md                           → Main docs
+QUICK_START.md                      → Getting started
+BACKEND_API_REQUIREMENTS.md         → API specs
+PROJECT_OVERVIEW.md                 → Architecture
+ARCHITECTURE.md                     → Diagrams
+COMPLETION_SUMMARY.md               → Status
+
+==================================================
+🎯 COMPONENT PROPS
+==================================================
+
+RadarMap:
+  radarData: RadarData | null
+  opacity: number (0-1)
+
+Header:
+  radarData: RadarData | null
+  isBackendConnected: boolean
+  onRefresh: () => void
+  isRefreshing: boolean
+
+ControlPanel:
+  opacity: number
+  onOpacityChange: (n: number) => void
+  autoRefresh: boolean
+  onAutoRefreshToggle: () => void
+  refreshInterval: number
+
+Legend:
+  (no props)
+
+==================================================
+🧪 TESTING CHECKLIST
+==================================================
+
+Pre-Backend:
+  [ ] App loads without errors
+  [ ] Map displays correctly
+  [ ] Controls respond
+  [ ] Mock data shows
+
+Post-Backend:
+  [ ] "Backend Connected" shows
+  [ ] Real data displays
+  [ ] Auto-refresh works
+  [ ] Timestamps update
+
+==================================================
+🚢 DEPLOYMENT
+==================================================
+
+Render.com:
+  1. Push to GitHub
+  2. New Static Site
+  3. Build: npm run build
+  4. Publish: dist
+  5. Env: VITE_API_URL
+
+Vercel:
+  vercel
+
+Netlify:
+  netlify deploy
+
+==================================================
+🐛 TROUBLESHOOTING
+==================================================
+
+Port busy:
+  npm run dev -- --port 3000
+
+Modules missing:
+  rm -rf node_modules
+  npm install
+
+Map not showing:
+  Check browser console
+  Verify Leaflet CSS imported
+
+Styles broken:
+  npm run build
+  npm run dev
+
+==================================================
+📊 PROJECT STATUS
+==================================================
+
+✅ Frontend Complete
+✅ Axios Integration Ready
+✅ Tailwind Styled
+✅ TypeScript Configured
+✅ Mock Data Working
+✅ Documentation Complete
+✅ Zero Linter Errors
+⏳ Awaiting Backend
+
+==================================================
+🎉 YOU'RE READY!
+==================================================
+
+Next Steps:
+  1. Run: npm run dev
+  2. Test app in browser
+  3. Review BACKEND_API_REQUIREMENTS.md
+  4. Build backend
+  5. Configure .env
+  6. Deploy!
+
+==================================================
+
